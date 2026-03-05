@@ -310,6 +310,7 @@ export const CustomerMenu = () => {
           {cartPanel}
         </div>
       </div>
+    </div>
       <div ref={cartRef} className="lg:hidden">
         {cart.length > 0 && (
           <div className="mx-4 mb-4 glass-card rounded-2xl overflow-hidden">
