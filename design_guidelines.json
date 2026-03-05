@@ -1,0 +1,156 @@
+{
+  "identity": {
+    "name": "E1",
+    "persona": "The Anti-AI Designer",
+    "principles": [
+      "Fusion over Imitation: Mix Modern Indian aesthetics with Swiss functionalism.",
+      "Emotion First: The app must feel 'warm', 'spicy', and 'inviting'.",
+      "Content is King: Food images are the heroes.",
+      "Negative Space: Don't clutter. Let the food breathe."
+    ]
+  },
+  "typography": {
+    "fonts": {
+      "headings": {
+        "family": "Playfair Display, serif",
+        "url": "https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&display=swap",
+        "usage": "Use for all major section headers, food names, and hero text.",
+        "className": "font-serif tracking-tight"
+      },
+      "body": {
+        "family": "Manrope, sans-serif",
+        "url": "https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&display=swap",
+        "usage": "Use for descriptions, prices, buttons, and interface text.",
+        "className": "font-sans"
+      }
+    },
+    "scale": {
+      "h1": "text-4xl md:text-5xl font-bold leading-tight",
+      "h2": "text-3xl md:text-4xl font-semibold",
+      "h3": "text-2xl font-semibold",
+      "body_lg": "text-lg leading-relaxed",
+      "body_base": "text-base leading-relaxed",
+      "caption": "text-sm text-muted-foreground"
+    }
+  },
+  "colors": {
+    "theme": "light",
+    "palette": {
+      "primary": {
+        "DEFAULT": "#E65100",
+        "foreground": "#FFFFFF",
+        "description": "Deep Saffron - The main appetizing color. Use for Primary Actions (Add to Cart, Pay)."
+      },
+      "secondary": {
+        "DEFAULT": "#F57F17",
+        "foreground": "#FFFFFF",
+        "description": "Turmeric Gold - Use for highlights, ratings, and secondary buttons."
+      },
+      "accent": {
+        "DEFAULT": "#B71C1C",
+        "foreground": "#FFFFFF",
+        "description": "Chili Red - Use for 'Spicy' tags, urgent alerts, or errors."
+      },
+      "background": {
+        "DEFAULT": "#FFF8E1",
+        "paper": "#FFFFFF",
+        "dark": "#1A1A1A",
+        "description": "Warm Cream (#FFF8E1) for app background to avoid sterile white. Paper White (#FFFFFF) for cards."
+      },
+      "text": {
+        "primary": "#263238",
+        "secondary": "#546E7A",
+        "muted": "#90A4AE"
+      },
+      "success": "#2E7D32",
+      "warning": "#FF6F00"
+    },
+    "gradients": {
+      "warm_spice": "bg-gradient-to-r from-orange-600 to-red-700",
+      "golden_hour": "bg-gradient-to-br from-amber-400 to-orange-500"
+    }
+  },
+  "spacing": {
+    "scale": "Generous. Use p-6 or p-8 where others use p-4.",
+    "grid_gap": "gap-6 md:gap-8",
+    "section_padding": "py-12 md:py-20"
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-[#E65100] hover:bg-[#BF360C] text-white rounded-full px-8 py-6 font-semibold shadow-lg hover:shadow-xl transition-all active:scale-95",
+      "secondary": "bg-[#FFF8E1] border-2 border-[#E65100] text-[#E65100] hover:bg-[#FFE0B2] rounded-full px-6 py-3 font-semibold transition-all",
+      "ghost": "hover:bg-orange-50 text-orange-900 rounded-lg px-4 py-2"
+    },
+    "cards": {
+      "menu_item": "bg-white rounded-2xl shadow-md hover:shadow-lg transition-shadow overflow-hidden border border-orange-100/50 group",
+      "dashboard_stat": "bg-white p-6 rounded-xl shadow-sm border border-stone-100",
+      "order_ticket": "bg-white p-4 rounded-xl shadow-md border-l-4 border-l-orange-500"
+    },
+    "inputs": {
+      "default": "bg-white border-orange-200 focus:border-orange-500 focus:ring-orange-200 rounded-lg h-12 px-4"
+    }
+  },
+  "layout_strategies": {
+    "customer_app": {
+      "type": "Mobile First",
+      "structure": "Bottom Navigation Bar (Home, Cart, Orders). Sticky Header with Table Number.",
+      "menu_grid": "grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+    },
+    "kitchen_dashboard": {
+      "type": "High Density Board",
+      "structure": "Kanban-style columns (New, Preparing, Ready) OR Masonry Grid of Tickets.",
+      "visuals": "High contrast text. Dark Mode option suggested for low-light kitchens.",
+      "typography": "Large, readable fonts for order items."
+    },
+    "manager_dashboard": {
+      "type": "Admin Panel",
+      "structure": "Sidebar Navigation + Data Tables.",
+      "tables": "Clean rows, alternating colors (zebra striping) with warm hues (orange-50)."
+    }
+  },
+  "visual_enhancers": {
+    "textures": [
+      "Use subtle noise overlays on backgrounds to reduce digital flatness.",
+      "Use 'spice' or 'mandala' patterns very subtly in watermarks or footers."
+    ],
+    "shadows": "Colored shadows! Use shadow-orange-500/20 instead of black shadows for a warmer feel.",
+    "borders": "Soft borders. Use border-orange-100 instead of grey."
+  },
+  "assets": {
+    "images": {
+      "login_bg": {
+        "url": "https://images.unsplash.com/photo-1764344815366-6ccf59fb13d0?crop=entropy&cs=srgb&fm=jpg&ixid=M3w3NDk1ODB8MHwxfHNlYXJjaHwxfHxpbmRpYW4lMjByZXN0YXVyYW50JTIwaW50ZXJpb3IlMjBtb2Rlcm4lMjB3YXJtJTIwbGlnaHRpbmd8ZW58MHx8fHwxNzcyMTAwNzM0fDA&ixlib=rb-4.1.0&q=85",
+        "alt": "Modern Indian Restaurant Interior"
+      },
+      "texture_spice": {
+        "url": "https://images.unsplash.com/photo-1663325265966-0d17de3e85c5?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDR8MHwxfHNlYXJjaHwzfHxpbmRpYW4lMjBzcGljZXMlMjB0ZXh0dXJlJTIwYmFja2dyb3VuZCUyMHRvcCUyMHZpZXd8ZW58MHx8fHwxNzcyMTAwNzM1fDA&ixlib=rb-4.1.0&q=85",
+        "alt": "Spices Texture"
+      },
+      "hero_food": {
+        "url": "https://images.pexels.com/photos/10148453/pexels-photo-10148453.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940",
+        "alt": "Warm Cafe Vibe"
+      }
+    },
+    "icons": "Use 'lucide-react' with rounded stroke styles. Color them Primary (#E65100)."
+  },
+  "instructions_to_main_agent": [
+    "INSTALL: yarn add lucide-react sonner framer-motion clsx tailwind-merge",
+    "FONTS: Import Playfair Display and Manrope in index.css immediately.",
+    "THEME: Set body background to #FFF8E1 (Warm Cream). DO NOT use default white.",
+    "FORMS: Use Shadcn UI logic but override styles to match the 'Warm/Spicy' theme (Orange rings, not black).",
+    "NOTIFICATIONS: Use Sonner for toasts. Style them with orange borders.",
+    "ROUTING: Ensure role-based protection (Customer, Kitchen, Manager).",
+    "REAL-TIME: Socket.io must trigger UI updates instantly (e.g., Order card moves column in Kitchen view).",
+    "PAYMENT: Disable payment button visually and functionally until status is 'Ready'.",
+    "INVOICE: Generate a clean, branded HTML/CSS invoice for print/pdf."
+  ],
+  "UNIVERSAL_GUIDELINES": [
+    "Do not use gradients for dark colors.",
+    "Use glass-morphism with amber/orange tints for overlays.",
+    "Interactive elements must have micro-animations (scale on click, color shift on hover).",
+    "NEVER center align the app container.",
+    "Use 'sonner' for toasts.",
+    "Components must use named exports.",
+    "All interactive elements must have data-testid."
+  ]
+}
