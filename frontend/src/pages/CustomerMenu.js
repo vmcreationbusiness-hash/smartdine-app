@@ -336,8 +336,6 @@ export const CustomerMenu = () => {
         </div>
       )}
     </div>
-  </div>
-  );
-};
+  );\n};
 / /   f i x e d  
  
