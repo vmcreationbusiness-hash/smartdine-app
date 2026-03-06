@@ -13,6 +13,7 @@ import { Label } from '../components/ui/label';
 import { toast } from 'sonner';
 import { Plus, Minus, Trash2, LogOut, Package, ShoppingBag, Search, X, Star } from 'lucide-react';
 import { formatCurrency } from '../utils/helpers';
+import { useTranslatedItems } from '../hooks/useTranslatedItems';
 
 export const CustomerMenu = () => {
   const [menuItems, setMenuItems] = useState([]);
@@ -32,8 +33,10 @@ export const CustomerMenu = () => {
   const navigate = useNavigate();
   const cartRef = useRef(null);
 
-  const getItemName = useCallback((item) => item.translations?.[currentLang]?.name || item.name, [currentLang]);
-  const getItemDescription = useCallback((item) => item.translations?.[currentLang]?.description || item.description, [currentLang]);
+  const translatedMenuItems = useTranslatedItems(menuItems, currentLang);
+
+  const getItemName = useCallback((item) => item._displayName || item.translations?.[currentLang]?.name || item.name, [currentLang]);
+  const getItemDescription = useCallback((item) => item._displayDescription || item.translations?.[currentLang]?.description || item.description, [currentLang]);
 
   useEffect(() => { fetchMenu(); fetchLoyaltyInfo(); fetchGstRates(); }, []); // eslint-disable-line
 
@@ -53,7 +56,7 @@ export const CustomerMenu = () => {
 
   const categories = useMemo(() => ['All', ...new Set(menuItems.map(i => i.category).filter(Boolean))], [menuItems]);
 
-  const filteredItems = useMemo(() => menuItems.filter(item => {
+  const filteredItems = useMemo(() => translatedMenuItems.filter(item => {
     const q = searchQuery.toLowerCase();
     const matchesSearch = !searchQuery || item.name.toLowerCase().includes(q) || (item.translations?.[currentLang]?.name || '').toLowerCase().includes(q) || (item.description || '').toLowerCase().includes(q);
     return matchesSearch && (activeCategory === 'All' || item.category === activeCategory);
@@ -296,7 +299,7 @@ export const CustomerMenu = () => {
       )}
 
       <VoiceAssistant
-        menuItems={menuItems}
+        menuItems={translatedMenuItems}
         cart={cart}
         onAddToCart={addToCart}
         onRemoveFromCart={removeFromCart}
@@ -306,5 +309,6 @@ export const CustomerMenu = () => {
       />
 
     </div>
+  </div>
   );
 };
