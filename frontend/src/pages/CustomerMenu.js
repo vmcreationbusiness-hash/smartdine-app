@@ -35,73 +35,45 @@ export const CustomerMenu = () => {
   const getItemName = useCallback((item) => item.translations?.[currentLang]?.name || item.name, [currentLang]);
   const getItemDescription = useCallback((item) => item.translations?.[currentLang]?.description || item.description, [currentLang]);
 
-
-
-  useEffect(() => {
-    fetchMenu();
-    fetchLoyaltyInfo();
-    fetchGstRates();
-  }, []); // eslint-disable-line
+  useEffect(() => { fetchMenu(); fetchLoyaltyInfo(); fetchGstRates(); }, []); // eslint-disable-line
 
   const fetchMenu = async () => {
-    try {
-      const r = await api.get('/menu');
-      setMenuItems(r.data);
-    } catch {
-      toast.error('Failed to load menu');
-    } finally {
-      setLoading(false);
-    }
+    try { const r = await api.get('/menu'); setMenuItems(r.data); }
+    catch { toast.error('Failed to load menu'); }
+    finally { setLoading(false); }
   };
 
   const fetchLoyaltyInfo = async () => {
-    try {
-      const r = await api.get('/orders/loyalty-info');
-      setLoyaltyPoints(r.data.loyaltyPoints);
-    } catch {}
+    try { const r = await api.get('/orders/loyalty-info'); setLoyaltyPoints(r.data.loyaltyPoints); } catch {}
   };
 
   const fetchGstRates = async () => {
-    try {
-      const r = await api.get('/settings/theme');
-      setGstRates({ sgst: r.data.sgstPercent ?? 2.5, cgst: r.data.cgstPercent ?? 2.5 });
-    } catch {}
+    try { const r = await api.get('/settings/theme'); setGstRates({ sgst: r.data.sgstPercent ?? 2.5, cgst: r.data.cgstPercent ?? 2.5 }); } catch {}
   };
 
-  const categories = useMemo(() => {
-    return ['All', ...new Set(menuItems.map(i => i.category).filter(Boolean))];
-  }, [menuItems]);
+  const categories = useMemo(() => ['All', ...new Set(menuItems.map(i => i.category).filter(Boolean))], [menuItems]);
 
-  const filteredItems = useMemo(() => {
-    return menuItems.filter(item => {
-      const q = searchQuery.toLowerCase();
-      const matchesSearch = !searchQuery ||
-        item.name.toLowerCase().includes(q) ||
-        (item.translations?.[currentLang]?.name || '').toLowerCase().includes(q) ||
-        (item.description || '').toLowerCase().includes(q);
-      const matchesCategory = activeCategory === 'All' || item.category === activeCategory;
-      return matchesSearch && matchesCategory;
-    });
-  }, [menuItems, searchQuery, activeCategory, currentLang]);
+  const filteredItems = useMemo(() => menuItems.filter(item => {
+    const q = searchQuery.toLowerCase();
+    const matchesSearch = !searchQuery || item.name.toLowerCase().includes(q) || (item.translations?.[currentLang]?.name || '').toLowerCase().includes(q) || (item.description || '').toLowerCase().includes(q);
+    return matchesSearch && (activeCategory === 'All' || item.category === activeCategory);
+  }), [menuItems, searchQuery, activeCategory, currentLang]);
 
-  const addToCart = (item) => {
+  const addToCart = useCallback((item) => {
     setCart(prev => {
       const existing = prev.find(c => c._id === item._id);
       if (existing) return prev.map(c => c._id === item._id ? { ...c, quantity: c.quantity + 1 } : c);
       return [...prev, { ...item, quantity: 1 }];
     });
     toast.success(getItemName(item) + ' added!', { duration: 1500 });
-  };
+  }, [getItemName]);
 
-  const updateQuantity = (itemId, change) => {
-    setCart(prev =>
-      prev.map(item => item._id === itemId ? { ...item, quantity: item.quantity + change } : item)
-         .filter(item => item.quantity > 0)
-    );
-  };
+  const updateQuantity = useCallback((itemId, change) => {
+    setCart(prev => prev.map(item => item._id === itemId ? { ...item, quantity: item.quantity + change } : item).filter(item => item.quantity > 0));
+  }, []);
 
-  const removeFromCart = (itemId) => setCart(prev => prev.filter(c => c._id !== itemId));
-  const clearCart = () => setCart([]);
+  const removeFromCart = useCallback((itemId) => setCart(prev => prev.filter(c => c._id !== itemId)), []);
+  const clearCart = useCallback(() => setCart([]), []);
   const getCartQty = (itemId) => cart.find(c => c._id === itemId)?.quantity || 0;
   const scrollToCart = () => cartRef.current?.scrollIntoView({ behavior: 'smooth' });
 
@@ -121,15 +93,10 @@ export const CustomerMenu = () => {
       const items = cart.map(item => ({ name: item.name, quantity: item.quantity, price: item.priceINR }));
       await api.post('/orders', { tableNumber, items, totalAmount, pointsUsed: pointsToUse });
       toast.success('Order placed successfully!');
-      setCart([]);
-      setTableNumber('');
-      setPointsToUse(0);
+      setCart([]); setTableNumber(''); setPointsToUse(0);
       navigate('/customer/orders');
-    } catch (error) {
-      toast.error(error.response?.data?.error || 'Failed to place order');
-    } finally {
-      setOrdering(false);
-    }
+    } catch (error) { toast.error(error.response?.data?.error || 'Failed to place order'); }
+    finally { setOrdering(false); }
   };
 
   if (loading) {
@@ -143,72 +110,72 @@ export const CustomerMenu = () => {
     );
   }
 
-  const cartPanel = (
-    <div className="flex flex-col h-full">
-      {cart.length === 0 ? (
-        <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
-          <ShoppingBag className="w-16 h-16 mb-4" style={{ color: theme.primaryColor + '30' }} />
-          <p className="text-lg font-semibold text-gray-400">{t('cart.empty')}</p>
-          <p className="text-sm text-gray-300 mt-1">Add items from the menu</p>
+  const CartContent = () => {
+    if (cart.length === 0) return (
+      <div className="flex-1 flex flex-col items-center justify-center p-8 text-center">
+        <ShoppingBag className="w-16 h-16 mb-4" style={{ color: theme.primaryColor + '30' }} />
+        <p className="text-lg font-semibold text-gray-400">{t('cart.empty')}</p>
+        <p className="text-sm text-gray-300 mt-1">Add items from the menu</p>
+      </div>
+    );
+    return (
+      <div className="flex flex-col h-full">
+        <div className="flex-1 overflow-y-auto p-4 space-y-3">
+          {cart.map((item) => (
+            <div key={item._id} className="flex items-center gap-3 p-3 rounded-xl bg-white/50">
+              <img src={item.image} alt={getItemName(item)} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-semibold truncate">{getItemName(item)}</p>
+                <p className="text-sm font-bold mt-0.5" style={{ color: theme.primaryColor }}>{formatCurrency(item.priceINR * item.quantity)}</p>
+              </div>
+              <div className="flex items-center gap-1">
+                <button onClick={() => updateQuantity(item._id, -1)} className="w-7 h-7 rounded-full flex items-center justify-center bg-gray-100"><Minus className="w-3 h-3" /></button>
+                <span className="text-sm font-bold w-6 text-center">{item.quantity}</span>
+                <button onClick={() => updateQuantity(item._id, 1)} className="w-7 h-7 rounded-full flex items-center justify-center text-white" style={{ backgroundColor: theme.primaryColor }}><Plus className="w-3 h-3" /></button>
+              </div>
+              <button onClick={() => removeFromCart(item._id)} className="p-1.5 text-red-400 hover:text-red-600 rounded-full"><Trash2 className="w-3.5 h-3.5" /></button>
+            </div>
+          ))}
         </div>
-      ) : (
-        <>
-          <div className="flex-1 overflow-y-auto p-4 space-y-3">
-            {cart.map((item) => (
-              <div key={item._id} className="flex items-center gap-3 p-3 rounded-xl bg-white/50">
-                <img src={item.image} alt={getItemName(item)} className="w-14 h-14 rounded-lg object-cover flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-semibold truncate">{getItemName(item)}</p>
-                  <p className="text-sm font-bold mt-0.5" style={{ color: theme.primaryColor }}>{formatCurrency(item.priceINR * item.quantity)}</p>
-                </div>
-                <div className="flex items-center gap-1">
-                  <button onClick={() => updateQuantity(item._id, -1)} className="w-7 h-7 rounded-full flex items-center justify-center bg-gray-100"><Minus className="w-3 h-3" /></button>
-                  <span className="text-sm font-bold w-6 text-center">{item.quantity}</span>
-                  <button onClick={() => updateQuantity(item._id, 1)} className="w-7 h-7 rounded-full flex items-center justify-center text-white" style={{ backgroundColor: theme.primaryColor }}><Plus className="w-3 h-3" /></button>
-                </div>
-                <button onClick={() => removeFromCart(item._id)} className="p-1.5 text-red-400 hover:text-red-600 rounded-full"><Trash2 className="w-3.5 h-3.5" /></button>
-              </div>
-            ))}
+        <div className="p-4 border-t space-y-3 bg-white/20" style={{ borderColor: theme.primaryColor + '10' }}>
+          <div>
+            <Label className="text-xs font-semibold">{t('cart.table_number')} *</Label>
+            <Input value={tableNumber} onChange={(e) => setTableNumber(e.target.value)} placeholder={t('cart.enter_table')} className="h-10 rounded-lg glass-input mt-1 text-sm" />
           </div>
-          <div className="p-4 border-t space-y-3 bg-white/20" style={{ borderColor: theme.primaryColor + '10' }}>
-            <div>
-              <Label className="text-xs font-semibold">{t('cart.table_number')} *</Label>
-              <Input value={tableNumber} onChange={(e) => setTableNumber(e.target.value)} placeholder={t('cart.enter_table')} className="h-10 rounded-lg glass-input mt-1 text-sm" />
-            </div>
-            {loyaltyPoints > 0 && (
-              <div className="rounded-xl p-3 border" style={{ backgroundColor: theme.primaryColor + '06', borderColor: theme.primaryColor + '20' }}>
-                <div className="flex justify-between items-center mb-2">
-                  <div className="flex items-center gap-1.5">
-                    <Star className="w-3.5 h-3.5" style={{ color: theme.secondaryColor }} />
-                    <span className="text-xs font-semibold">{t('menu.loyalty_points')}</span>
-                  </div>
-                  <span className="text-xs text-gray-400">{loyaltyPoints} available</span>
+          {loyaltyPoints > 0 && (
+            <div className="rounded-xl p-3 border" style={{ backgroundColor: theme.primaryColor + '06', borderColor: theme.primaryColor + '20' }}>
+              <div className="flex justify-between items-center mb-2">
+                <div className="flex items-center gap-1.5">
+                  <Star className="w-3.5 h-3.5" style={{ color: theme.secondaryColor }} />
+                  <span className="text-xs font-semibold">{t('menu.loyalty_points')}</span>
                 </div>
-                <Input type="number" value={pointsToUse} onChange={(e) => setPointsToUse(Math.min(parseInt(e.target.value) || 0, loyaltyPoints, totalAmount * 0.5))} className="h-8 rounded-lg glass-input text-sm" />
+                <span className="text-xs text-gray-400">{loyaltyPoints} available</span>
               </div>
-            )}
-            <div className="space-y-1.5">
-              <div className="flex justify-between text-sm"><span className="text-gray-500">{t('cart.subtotal')}</span><span className="font-semibold">{formatCurrency(totalAmount)}</span></div>
-              {discount > 0 && <div className="flex justify-between text-sm text-green-600"><span>Points discount</span><span>-{formatCurrency(discount)}</span></div>}
-              <div className="flex justify-between text-sm text-gray-400"><span>SGST ({gstRates.sgst}%)</span><span>+{formatCurrency(sgstAmount)}</span></div>
-              <div className="flex justify-between text-sm text-gray-400"><span>CGST ({gstRates.cgst}%)</span><span>+{formatCurrency(cgstAmount)}</span></div>
-              <div className="flex justify-between items-center pt-2 border-t" style={{ borderColor: theme.primaryColor + '15' }}>
-                <span className="font-bold">{t('payment.total')}</span>
-                <span className="text-2xl font-bold" style={{ color: theme.primaryColor }}>{formatCurrency(finalAmount)}</span>
-              </div>
+              <Input type="number" value={pointsToUse} onChange={(e) => setPointsToUse(Math.min(parseInt(e.target.value) || 0, loyaltyPoints, totalAmount * 0.5))} className="h-8 rounded-lg glass-input text-sm" />
             </div>
-            <Button onClick={placeOrder} disabled={ordering} className="w-full text-white rounded-xl h-12 font-semibold" style={{ background: 'linear-gradient(135deg, ' + theme.primaryColor + ', ' + theme.secondaryColor + ')' }}>
-              {ordering ? t('cart.placing_order') : t('cart.place_order')}
-            </Button>
-            <p className="text-[10px] text-center text-gray-400">{t('cart.payment_after_ready')}</p>
+          )}
+          <div className="space-y-1.5">
+            <div className="flex justify-between text-sm"><span className="text-gray-500">{t('cart.subtotal')}</span><span className="font-semibold">{formatCurrency(totalAmount)}</span></div>
+            {discount > 0 && <div className="flex justify-between text-sm text-green-600"><span>Points discount</span><span>-{formatCurrency(discount)}</span></div>}
+            <div className="flex justify-between text-sm text-gray-400"><span>SGST ({gstRates.sgst}%)</span><span>+{formatCurrency(sgstAmount)}</span></div>
+            <div className="flex justify-between text-sm text-gray-400"><span>CGST ({gstRates.cgst}%)</span><span>+{formatCurrency(cgstAmount)}</span></div>
+            <div className="flex justify-between items-center pt-2 border-t" style={{ borderColor: theme.primaryColor + '15' }}>
+              <span className="font-bold">{t('payment.total')}</span>
+              <span className="text-2xl font-bold" style={{ color: theme.primaryColor }}>{formatCurrency(finalAmount)}</span>
+            </div>
           </div>
-        </>
-      )}
-    </div>
-  );
+          <Button onClick={placeOrder} disabled={ordering} className="w-full text-white rounded-xl h-12 font-semibold" style={{ background: 'linear-gradient(135deg, ' + theme.primaryColor + ', ' + theme.secondaryColor + ')' }}>
+            {ordering ? t('cart.placing_order') : t('cart.place_order')}
+          </Button>
+          <p className="text-[10px] text-center text-gray-400">{t('cart.payment_after_ready')}</p>
+        </div>
+      </div>
+    );
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
+
       <header className="glass-header sticky top-0 z-20">
         <div className="max-w-[1400px] mx-auto px-4 py-3 flex items-center justify-between">
           <AppBranding size="small" showName={true} />
@@ -228,23 +195,23 @@ export const CustomerMenu = () => {
           </div>
         </div>
       </header>
+
       <div className="flex-1 flex flex-col lg:flex-row max-w-[1400px] mx-auto w-full">
+
         <div className="flex-1 p-4 md:p-6 overflow-y-auto">
           <div className="flex flex-col sm:flex-row sm:items-center gap-3 mb-5">
             <h2 className="text-2xl md:text-3xl font-bold flex-shrink-0" style={{ color: theme.primaryColor }}>{t('menu.our_menu', 'Our Menu')}</h2>
             <div className="relative flex-1 max-w-sm">
-              
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search dishes..." className="search-bar w-full pl-9 pr-8 py-2.5 outline-none" />
-                {searchQuery && (
-                  <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full hover:bg-gray-100">
-                    <X className="w-3.5 h-3.5 text-gray-400" />
-                  </button>
-                )}
-              </div>
-
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+              <input type="text" value={searchQuery} onChange={(e) => setSearchQuery(e.target.value)} placeholder="Search dishes..." className="search-bar w-full pl-9 pr-8 py-2.5 outline-none" />
+              {searchQuery && (
+                <button onClick={() => setSearchQuery('')} className="absolute right-2.5 top-1/2 -translate-y-1/2 w-5 h-5 flex items-center justify-center rounded-full hover:bg-gray-100">
+                  <X className="w-3.5 h-3.5 text-gray-400" />
+                </button>
+              )}
             </div>
           </div>
+
           {categories.length > 1 && (
             <div className="flex gap-2 mb-5 overflow-x-auto pb-1">
               {categories.map((cat) => (
@@ -254,9 +221,7 @@ export const CustomerMenu = () => {
               ))}
             </div>
           )}
-          {(searchQuery || activeCategory !== 'All') && (
-            <p className="text-sm text-gray-400 mb-4">{filteredItems.length} dish{filteredItems.length !== 1 ? 'es' : ''} found</p>
-          )}
+
           {filteredItems.length === 0 ? (
             <div className="text-center py-16">
               <Search className="w-16 h-16 mx-auto mb-4" style={{ color: theme.primaryColor + '30' }} />
@@ -273,25 +238,17 @@ export const CustomerMenu = () => {
                       <img src={item.image} alt={getItemName(item)} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent" />
                       {item.category && (
-                        <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white" style={{ background: theme.primaryColor + 'cc' }}>
-                          {item.category}
-                        </span>
+                        <span className="absolute top-2 left-2 px-2 py-0.5 rounded-full text-[10px] font-semibold text-white" style={{ background: theme.primaryColor + 'cc' }}>{item.category}</span>
                       )}
                       <div className="absolute bottom-2 right-2">
                         {qty > 0 ? (
                           <div className="flex items-center gap-1 bg-white/95 backdrop-blur rounded-full px-2 py-1 shadow-lg">
-                            <button onClick={(e) => { e.stopPropagation(); updateQuantity(item._id, -1); }} className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-gray-100">
-                              <Minus className="w-3 h-3 text-gray-600" />
-                            </button>
+                            <button onClick={(e) => { e.stopPropagation(); updateQuantity(item._id, -1); }} className="w-5 h-5 rounded-full flex items-center justify-center hover:bg-gray-100"><Minus className="w-3 h-3 text-gray-600" /></button>
                             <span className="text-sm font-bold w-4 text-center" style={{ color: theme.primaryColor }}>{qty}</span>
-                            <button onClick={(e) => { e.stopPropagation(); addToCart(item); }} className="w-5 h-5 rounded-full flex items-center justify-center text-white" style={{ backgroundColor: theme.primaryColor }}>
-                              <Plus className="w-3 h-3" />
-                            </button>
+                            <button onClick={(e) => { e.stopPropagation(); addToCart(item); }} className="w-5 h-5 rounded-full flex items-center justify-center text-white" style={{ backgroundColor: theme.primaryColor }}><Plus className="w-3 h-3" /></button>
                           </div>
                         ) : (
-                          <button onClick={() => addToCart(item)} className="flex items-center gap-1 bg-white/95 backdrop-blur rounded-full px-3 py-1.5 text-xs font-semibold shadow-lg hover:bg-white" style={{ color: theme.primaryColor }}>
-                            <Plus className="w-3 h-3" />Add
-                          </button>
+                          <button onClick={() => addToCart(item)} className="flex items-center gap-1 bg-white/95 backdrop-blur rounded-full px-3 py-1.5 text-xs font-semibold shadow-lg hover:bg-white" style={{ color: theme.primaryColor }}><Plus className="w-3 h-3" />Add</button>
                         )}
                       </div>
                     </div>
@@ -306,10 +263,13 @@ export const CustomerMenu = () => {
             </div>
           )}
         </div>
+
         <div className="hidden lg:flex flex-col w-[380px] border-l glass-strong sticky top-[60px] h-[calc(100vh-60px)]" style={{ borderColor: theme.primaryColor + '15' }}>
-          {cartPanel}
+          <CartContent />
         </div>
+
       </div>
+
       <div ref={cartRef} className="lg:hidden">
         {cart.length > 0 && (
           <div className="mx-4 mb-4 glass-card rounded-2xl overflow-hidden">
@@ -320,12 +280,13 @@ export const CustomerMenu = () => {
               </div>
               <span className="text-sm font-semibold px-2.5 py-0.5 rounded-full text-white" style={{ backgroundColor: theme.primaryColor }}>{totalItems} item{totalItems !== 1 ? 's' : ''}</span>
             </div>
-            {cartPanel}
+            <CartContent />
           </div>
         )}
       </div>
+
       {cart.length > 0 && (
-        <div className="lg:hidden fixed bottom-4 right-4 z-30">
+        <div className="lg:hidden fixed bottom-24 right-4 z-30">
           <button onClick={scrollToCart} className="floating-cart-btn text-white flex items-center gap-2" style={{ background: 'linear-gradient(135deg, ' + theme.primaryColor + ', ' + theme.secondaryColor + ')' }}>
             <ShoppingBag className="w-5 h-5" />
             <span className="text-sm font-bold">{totalItems} item{totalItems !== 1 ? 's' : ''}</span>
@@ -333,6 +294,7 @@ export const CustomerMenu = () => {
           </button>
         </div>
       )}
+
       <VoiceAssistant
         menuItems={menuItems}
         cart={cart}
@@ -342,6 +304,8 @@ export const CustomerMenu = () => {
         onPlaceOrder={placeOrder}
         getItemName={getItemName}
       />
+
     </div>
+  </div>
   );
 };
