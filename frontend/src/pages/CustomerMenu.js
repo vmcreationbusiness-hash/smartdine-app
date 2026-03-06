@@ -310,5 +310,6 @@ export const CustomerMenu = () => {
 
     </div>
   </div>
+  </div>
   );
 };
